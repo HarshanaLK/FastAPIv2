@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import cv2
 import numpy as np
 from keras.models import load_model
-from mtcnn.mtcnn import MTCNN
 
 app = FastAPI()
 
@@ -18,24 +17,25 @@ app.add_middleware(
 )
 
 # Load pre-trained models
-mtcnn_detector = MTCNN()
-emotion_model = load_model('emotion_model.hdf5')
+emotion_model = load_model('C:/Users/ASUS/Desktop/emotion_model.hdf5')
 
 emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
+# Initialize Haar Cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
 async def detect_emotion(frame):
     try:
-        # Convert the image
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Detect faces using Haar Cascade
+        faces = face_cascade.detectMultiScale(frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-        # Detect faces using MTCNN
-        faces = mtcnn_detector.detect_faces(frame)
-
-        if not faces:
+        if len(faces) == 0:
             return None
 
-        x, y, width, height = faces[0]['box']
-        face_roi = gray[y:y + height, x:x + width]
+        # Assuming only the first face is used for emotion detection
+        (x, y, w, h) = faces[0]
+        face_roi = frame[y:y + h, x:x + w]
+        face_roi = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
         face_roi = cv2.resize(face_roi, (64, 64), interpolation=cv2.INTER_AREA)
         face_roi = np.expand_dims(np.expand_dims(face_roi, -1), 0) / 255.0
 
