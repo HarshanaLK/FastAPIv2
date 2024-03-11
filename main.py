@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 # Load pre-trained models
-emotion_model = load_model('C:/Users/ASUS/Desktop/emotion_model.hdf5')
+emotion_model = load_model('emotion_model.hdf5')
 
 emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
