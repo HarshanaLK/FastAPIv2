@@ -38,27 +38,17 @@ async def detect_emotion(frame):
         keypoints = faces[0]['keypoints']
         left_eye = keypoints['left_eye']
         right_eye = keypoints['right_eye']
-        nose = keypoints['nose']
-        mouth_left = keypoints['mouth_left']
-        mouth_right = keypoints['mouth_right']
 
-        # Additional keypoints: Calculate the center of the mouth
-        mouth_center = ((mouth_left[0] + mouth_right[0]) // 2, (mouth_left[1] + mouth_right[1]) // 2)
-
-        # Additional keypoints: Calculate the center of the nose
-        nose_center = nose
-
-        # Additional keypoints: Calculate the center of the face
-        face_center = ((left_eye[0] + right_eye[0] + nose_center[0] + mouth_center[0]) // 4,
-                       (left_eye[1] + right_eye[1] + nose_center[1] + mouth_center[1]) // 4)
+        # Calculate the center of the eyes
+        eyes_center = ((left_eye[0] + right_eye[0]) // 2, (left_eye[1] + right_eye[1]) // 2)
 
         # Calculate the angle between the eyes
         angle = np.degrees(np.arctan2(right_eye[1] - left_eye[1], right_eye[0] - left_eye[0]))
 
         # Get the rotation matrix for rotating the image around the eyes center
-        rotation_matrix = cv2.getRotationMatrix2D(face_center, angle, 1.0)
+        rotation_matrix = cv2.getRotationMatrix2D(eyes_center, angle, 1.0)
 
-        # Rotate the image to align the facial features
+        # Rotate the image to align the eyes horizontally
         aligned_frame = cv2.warpAffine(frame, rotation_matrix, (frame.shape[1], frame.shape[0]), flags=cv2.INTER_LINEAR)
 
         # Get the face region using MTCNN bounding box
